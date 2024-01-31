@@ -1,5 +1,8 @@
 package com.demo.dummy.Processor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.json.JSONArray;
@@ -50,12 +53,13 @@ public class JsonResponseProcessor implements Processor {
             int totalRecord = Integer.parseInt(evaluateXPath(xPath, document, "/TravelerinformationResponse/totalrecord"));
 
             // Create a nested JSON object
-            JSONObject jsonResult = new JSONObject();
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode jsonResult = objectMapper.createObjectNode();
             jsonResult.put("page", page);
             jsonResult.put("totalrecord", totalRecord);
 
             // Extract travelers information
-            JSONArray travelersArray = new JSONArray();
+            ArrayNode travelersArray = jsonResult.putArray("travelers");
             XPathExpression travelersExpression = xPath.compile("/TravelerinformationResponse/travelers/Travelerinformation");
 
             NodeList travelersList = (NodeList) travelersExpression.evaluate(document, XPathConstants.NODESET);
@@ -64,16 +68,16 @@ public class JsonResponseProcessor implements Processor {
                 if (travelerNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element travelerElement = (Element) travelerNode;
 
-                    JSONObject travelerObject = new JSONObject();
+                    ObjectNode travelerObject = objectMapper.createObjectNode();
                     travelerObject.put("id", Integer.parseInt(getElementValue(travelerElement, "id")));
                     travelerObject.put("name", getElementValue(travelerElement, "name"));
                     travelerObject.put("email", getElementValue(travelerElement, "email"));
 
-                    travelersArray.put(travelerObject);
+                    travelersArray.add(travelerObject);
                 }
             }
 
-            jsonResult.put("travelers", travelersArray);
+            //jsonResult.put("travelers", travelersArray);
 
             exchange.getMessage().setBody(jsonResult);
 
