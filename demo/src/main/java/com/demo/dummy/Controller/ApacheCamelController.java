@@ -24,4 +24,9 @@ public class ApacheCamelController {
     public ResponseEntity<String> callXmlApi() {
         return new ResponseEntity<>(apacheCamelService.callXmlApi(), HttpStatus.OK);
     }
+
+    @GetMapping("/callSftp")
+    public ResponseEntity<String> callSftp() {
+        return new ResponseEntity<>(apacheCamelService.callSftp(), HttpStatus.OK);
+    }
 }
